@@ -1,39 +1,80 @@
 import RPi.GPIO as GPIO
 import time
 
-light_gpio_pins = [17, 27, 22, 23]
+light_gpio_pins = [17, 24, 27]
 
 def turn_on(gpio_pin):
-  print "LED on"
   GPIO.output(gpio_pin, GPIO.HIGH)
 
-def turn_all_off():
-  print "LED off"
+def turn_on_all_lights():
+  for gpiopin in light_gpio_pins:
+    turn_on(gpiopin)
+
+def blink_all(times=3):
+  delay = 0.1
+  for n in range(times):
+    turn_on_all_lights();
+    time.sleep(delay);
+    turn_off_all();
+    time.sleep(delay);
+
+def turn_off_all():
   for gpiopin in light_gpio_pins:
     GPIO.output(gpiopin, GPIO.LOW)
 
-GPIO.setmode(GPIO.BCM)
-
-def gpio_lights():
+def arm_lights():
   for gpiopin in light_gpio_pins:
     GPIO.setup(gpiopin, GPIO.OUT)
-    turn_on(gpiopin)
 
-  time.sleep(1000)
-  turn_all_off()
+def warn_light_on():
+  turn_on(17)
 
-GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+def success_light_on():
+  turn_on(24)
+
+def error_light_on():
+  turn_on(27)
+
+def notify_beer():
+  print("beer")
+  warn_light_on();
+  # make request here
+  time.sleep(1);
+  turn_off_all();
+  success_light_on();
+  time.sleep(1);
+  turn_off_all();
+
+def notify_whiskey():
+  print("whiskey")
+  warn_light_on();
+  # make request here
+  time.sleep(1);
+  turn_off_all();
+  error_light_on();
+  time.sleep(1);
+  turn_off_all();
 
 
+def arm_button_actions():
+  GPIO.setup(22, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+  GPIO.setup(23, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
-def button_state():
   while True:
-    input_state_22 = GPIO.input(22)
-    print('22: %', input_state_22)
-    input_state_23 = GPIO.input(23)
-    print('23: %', input_state_23)
-    time.sleep(0.5)
-    # if ((input_state_22 == False) or (input_state_23 == False):
+    btn_2 = GPIO.input(22)
+    btn_1 = GPIO.input(23)
 
-button_state();
+    if (btn_1 == False):
+      notify_beer()
+      time.sleep(1)
+
+    if (btn_2 == False):
+      notify_whiskey()
+      time.sleep(1)
+
+## STOP FUNCTIONS, START PROCEDURE
+GPIO.setmode(GPIO.BCM)
+
+arm_lights()
+blink_all()
+arm_button_actions();
