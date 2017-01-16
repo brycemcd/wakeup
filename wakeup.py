@@ -36,12 +36,15 @@ def success_light_on():
 def error_light_on():
   turn_on(27)
 
+def current_datetime():
+  return datetime.datetime.now()
+
 def current_time():
   return datetime.datetime.now().time()
 
 def min_wakeuptime():
   """Any hour before this hour is NOT okay to wakeup"""
-  return datetime.time(07, 00)
+  return datetime.time(07, 10)
 
 def max_wakeuptime():
   """
@@ -54,8 +57,8 @@ def wakeup_ok():
   return (current_time() > min_wakeuptime()) and (current_time() < max_wakeuptime())
 
 def log_button_push():
-  f = open('button_log.csv', 'a')
-  f.write( str(current_time()) + '\n')
+  f = open('/home/pi/Desktop/button_log.csv', 'a')
+  f.write( str(current_datetime()) + '\n')
   f.close()
 
 def check_wakeup():
