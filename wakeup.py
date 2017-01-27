@@ -2,6 +2,11 @@ import RPi.GPIO as GPIO
 import time
 import datetime
 
+import os
+
+# TODO: why does this get set to UTC when running as cron?
+os.environ['TZ'] = 'America/New_York'
+
 light_gpio_pins = [17, 24, 27]
 
 def turn_on(gpio_pin):
@@ -40,7 +45,7 @@ def current_datetime():
   return datetime.datetime.now()
 
 def current_time():
-  return datetime.datetime.now().time()
+  return datetime.datetime.now().timetz()
 
 def min_wakeuptime():
   """Any hour before this hour is NOT okay to wakeup"""
@@ -51,14 +56,17 @@ def max_wakeuptime():
   Any hour after this hour indicates that a child can not 
   possibly sleep this long
   """
-  return datetime.time(10, 00)
+  return datetime.time(20, 00)
 
 def wakeup_ok():
-  return (current_time() > min_wakeuptime()) and (current_time() < max_wakeuptime())
+  print(min_wakeuptime())
+  print(max_wakeuptime())
+  print(current_time())
+  return (min_wakeuptime() < current_time() < max_wakeuptime())
 
 def log_button_push():
   f = open('/home/pi/Desktop/button_log.csv', 'a')
-  f.write( str(current_datetime()) + '\n')
+  f.write( str(current_datetime()) + ',' + str(current_time()) + ',' + str(min_wakeuptime()) + ',' + str(max_wakeuptime()) + '\n')
   f.close()
 
 def check_wakeup():
